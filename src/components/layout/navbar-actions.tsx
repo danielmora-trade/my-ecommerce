@@ -72,7 +72,7 @@ export const NavbarActions = ({ isAuthenticated, cartCount, userEmail }: NavbarA
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/mis-pedidos" className="cursor-pointer">
+            <Link href="/pedidos" className="cursor-pointer">
               <ShoppingCart className="h-4 w-4 mr-2" />
               Mis Pedidos
             </Link>

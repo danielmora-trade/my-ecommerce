@@ -201,12 +201,30 @@ export async function getUserOrders() {
       order_number,
       status,
       payment_status,
+      subtotal,
+      tax,
+      shipping_cost,
       total,
       created_at,
+      shipping_method,
+      metadata,
+      shipping_address:addresses!orders_shipping_address_id_fkey(
+        full_name,
+        phone,
+        address_line_1,
+        address_line_2,
+        city,
+        state,
+        postal_code,
+        country
+      ),
       order_items(
         id,
+        product_name,
+        product_sku,
         quantity,
-        products(name, slug)
+        price,
+        total
       )
     `)
     .eq('user_id', user.id)

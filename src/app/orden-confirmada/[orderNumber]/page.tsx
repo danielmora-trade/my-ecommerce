@@ -232,7 +232,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
                 Continuar Comprando
               </Button>
             </Link>
-            <Link href="/orders" className="flex-1">
+            <Link href="/pedidos" className="flex-1">
               <Button className="w-full bg-brand-600 hover:bg-brand-700" size="lg">
                 Ver Mis Pedidos
                 <ArrowRight className="ml-2 h-5 w-5" />
