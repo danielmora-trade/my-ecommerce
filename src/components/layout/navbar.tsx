@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, Search, User, Menu, Phone, Mail } from 'lucide-react'
+import { ShoppingCart, User, Menu, Phone, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { SearchBar } from './search-bar'
+import { getCategories } from '@/app/actions'
 
-export default function Navbar() {
+export default async function Navbar() {
+  const categories = await getCategories()
+
   return (
     <header className="border-b border-border bg-white sticky top-0 z-50 shadow-sm">
       {/* Top bar */}
@@ -44,21 +47,7 @@ export default function Navbar() {
           </Link>
 
           {/* Search bar */}
-          <div className="hidden md:flex flex-1 max-w-2xl">
-            <div className="relative w-full">
-              <Input
-                type="search"
-                placeholder="Buscar aceros, vigas, perfiles, varillas..."
-                className="pr-12 h-11"
-              />
-              <Button
-                className="absolute right-0 top-0 h-11 px-6 bg-brand-600 hover:bg-brand-700"
-                size="sm"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
+          <SearchBar className="hidden md:flex flex-1 max-w-2xl" />
 
           {/* Actions */}
           <div className="flex items-center gap-2">
@@ -88,21 +77,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile search */}
-        <div className="md:hidden mt-3">
-          <div className="relative">
-            <Input
-              type="search"
-              placeholder="Buscar productos..."
-              className="pr-12"
-            />
-            <Button
-              className="absolute right-0 top-0 bg-brand-600 hover:bg-brand-700"
-              size="sm"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <SearchBar className="md:hidden mt-3" />
       </div>
 
       {/* Categories navigation */}
@@ -110,53 +85,20 @@ export default function Navbar() {
         <div className="container mx-auto px-4">
           <nav className="flex items-center gap-1 overflow-x-auto py-2 text-sm scrollbar-hide">
             <Link
-              href="/categorias/varillas"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
+              href="/productos"
+              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors font-medium"
             >
-              Varillas
+              Todos los Productos
             </Link>
-            <Link
-              href="/categorias/perfiles"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
-            >
-              Perfiles
-            </Link>
-            <Link
-              href="/categorias/vigas"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
-            >
-              Vigas
-            </Link>
-            <Link
-              href="/categorias/laminas"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
-            >
-              Láminas
-            </Link>
-            <Link
-              href="/categorias/tubos"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
-            >
-              Tubos y Cañerías
-            </Link>
-            <Link
-              href="/categorias/mallas"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
-            >
-              Mallas
-            </Link>
-            <Link
-              href="/categorias/accesorios"
-              className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
-            >
-              Accesorios
-            </Link>
-            <Link
-              href="/promociones"
-              className="px-4 py-2 bg-brand-600 text-white hover:bg-brand-700 rounded-md whitespace-nowrap transition-colors font-medium"
-            >
-              🔥 Promociones
-            </Link>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/categorias/${category.slug}`}
+                className="px-4 py-2 hover:bg-white hover:text-brand-600 rounded-md whitespace-nowrap transition-colors"
+              >
+                {category.name}
+              </Link>
+            ))}
           </nav>
         </div>
       </div>
