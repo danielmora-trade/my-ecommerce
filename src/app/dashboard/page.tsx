@@ -54,7 +54,7 @@ export default async function Dashboard() {
             Welcome back! 👋
           </h1>
           <p className="text-xl text-muted-foreground">
-            Here's what's happening with your store today
+            Here&apos;s what&apos;s happening with your store today
           </p>
         </div>
 
@@ -179,7 +179,7 @@ export default async function Dashboard() {
                 <div className="p-4 bg-gradient-subtle rounded-lg border border-border">
                   <h4 className="font-semibold text-foreground mb-2">🎉 Welcome to My E-Commerce!</h4>
                   <p className="text-sm text-muted-foreground mb-3">
-                    You're all set up and ready to go. Here's what you can do next:
+                    You&apos;re all set up and ready to go. Here&apos;s what you can do next:
                   </p>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">

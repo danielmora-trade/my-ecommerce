@@ -62,8 +62,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
           setTimeout(() => window.location.href = '/dashboard', 1000)
         }
       }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'An unexpected error occurred' })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      setMessage({ type: 'error', text: errorMessage })
     } finally {
       setIsLoading(false)
     }
@@ -86,8 +87,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
           text: result.message 
         })
       }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'An unexpected error occurred' })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      setMessage({ type: 'error', text: errorMessage })
     } finally {
       setIsLoading(false)
     }
@@ -107,8 +109,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
         // Redirect to OAuth provider
         window.location.href = result.url
       }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'An unexpected error occurred' })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      setMessage({ type: 'error', text: errorMessage })
     } finally {
       setIsLoading(false)
     }

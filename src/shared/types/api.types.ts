@@ -49,7 +49,7 @@ export interface SignInWithOTPResponse {
   message: string
 }
 
-export interface SignOutRequest {}
+export type SignOutRequest = Record<string, never>
 
 export interface SignOutResponse {
   success: boolean
@@ -274,7 +274,7 @@ export interface APIError {
 
 // ==================== GENERIC RESPONSE ====================
 
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string

@@ -3,10 +3,10 @@
  * POST /api/auth/signout
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { authService } from '@/backend/services/auth.service'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Call backend service
     const result = await authService.signOut()

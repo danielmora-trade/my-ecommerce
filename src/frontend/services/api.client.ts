@@ -15,7 +15,6 @@ import type {
   GetUserResponse,
   OAuthSignInRequest,
   OAuthSignInResponse,
-  APIResponse,
 } from '@/shared/types/api.types'
 
 class APIClient {
