@@ -153,6 +153,11 @@ export class AuthService {
         provider,
         options: {
           redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+          skipBrowserRedirect: false,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       })
 
