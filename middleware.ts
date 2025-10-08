@@ -1,8 +1,24 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  // Check if user has access token cookie
+  const accessToken = request.cookies.get('access_token')?.value
+
+  // Protected routes that require authentication
+  const isProtectedRoute = 
+    !request.nextUrl.pathname.startsWith('/auth') &&
+    !request.nextUrl.pathname.startsWith('/api') &&
+    request.nextUrl.pathname !== '/'
+
+  // If no access token and trying to access protected route, redirect to signin
+  if (!accessToken && isProtectedRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/signin'
+    return NextResponse.redirect(url)
+  }
+
+  // Continue with request
+  return NextResponse.next()
 }
 
 export const config = {
@@ -17,4 +33,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
-
