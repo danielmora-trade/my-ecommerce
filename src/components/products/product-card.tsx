@@ -1,24 +1,25 @@
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Star, ShoppingCart } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { ProductWithRelations } from '@/app/actions'
+import { AddToCartButton } from '@/components/cart/add-to-cart-button'
 
 interface ProductCardProps {
   product: ProductWithRelations
   categoryIcon?: string
+  isAuthenticated?: boolean
 }
 
-export const ProductCard = ({ product, categoryIcon }: ProductCardProps) => {
+export const ProductCard = ({ product, categoryIcon, isAuthenticated = false }: ProductCardProps) => {
   const rating = 4.8
   const stockStatus = product.quantity < 100 ? 'Limitado' : 'En stock'
   
   return (
-    <Link href={`/productos/${product.slug}`}>
-      <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-brand-600 h-full">
-        <CardContent className="p-0">
-          {/* Product Image */}
-          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+    <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-brand-600 h-full">
+      <CardContent className="p-0">
+        {/* Product Image */}
+        <Link href={`/productos/${product.slug}`} className="block">
+          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden cursor-pointer">
             <div className="absolute inset-0 flex items-center justify-center text-6xl">
               {categoryIcon || '🔩'}
             </div>
@@ -39,40 +40,45 @@ export const ProductCard = ({ product, categoryIcon }: ProductCardProps) => {
               </div>
             </div>
           </div>
+        </Link>
 
-          {/* Product Info */}
-          <div className="p-4">
-            {product.categories && (
-              <p className="text-xs text-brand-600 font-medium mb-1">
-                {product.categories.name}
-              </p>
-            )}
-            <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors line-clamp-2 min-h-[3rem]">
+        {/* Product Info */}
+        <div className="p-4">
+          {product.categories && (
+            <p className="text-xs text-brand-600 font-medium mb-1">
+              {product.categories.name}
+            </p>
+          )}
+          <Link href={`/productos/${product.slug}`}>
+            <h3 className="font-semibold text-gray-900 mb-2 hover:text-brand-600 transition-colors line-clamp-2 min-h-[3rem] cursor-pointer">
               {product.name}
             </h3>
-            {product.short_description && (
-              <p className="text-xs text-gray-500 mb-3 line-clamp-2">
-                {product.short_description}
-              </p>
-            )}
-            <div className="flex items-baseline gap-2 mb-3">
-              <span className="text-2xl font-bold text-brand-600">
-                ${Number(product.price).toFixed(2)}
+          </Link>
+          {product.short_description && (
+            <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+              {product.short_description}
+            </p>
+          )}
+          <div className="flex items-baseline gap-2 mb-3">
+            <span className="text-2xl font-bold text-brand-600">
+              ${Number(product.price).toFixed(2)}
+            </span>
+            {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+              <span className="text-sm text-gray-500 line-through">
+                ${Number(product.compare_at_price).toFixed(2)}
               </span>
-              {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
-                <span className="text-sm text-gray-500 line-through">
-                  ${Number(product.compare_at_price).toFixed(2)}
-                </span>
-              )}
-            </div>
-            <Button className="w-full bg-brand-600 hover:bg-brand-700 group-hover:shadow-lg transition-shadow">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Agregar al Carrito
-            </Button>
+            )}
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+          <AddToCartButton
+            productId={product.id}
+            productName={product.name}
+            isAuthenticated={isAuthenticated}
+            disabled={product.quantity === 0}
+            className="w-full bg-brand-600 hover:bg-brand-700 group-hover:shadow-lg transition-shadow"
+          />
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

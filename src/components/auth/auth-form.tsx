@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { apiClient } from '@/frontend/services/api.client'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +16,7 @@ interface AuthFormProps {
 }
 
 export default function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -30,36 +32,51 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setMessage(null)
 
     try {
+      const supabase = createClient()
+
       if (mode === 'signup') {
         if (password !== confirmPassword) {
           setMessage({ type: 'error', text: 'Passwords do not match' })
+          setIsLoading(false)
           return
         }
         if (password.length < 6) {
           setMessage({ type: 'error', text: 'Password must be at least 6 characters' })
+          setIsLoading(false)
           return
         }
 
-        // Call backend API
-        const result = await apiClient.signUp({ email, password })
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        })
 
-        if (!result.success) {
-          setMessage({ type: 'error', text: result.message })
+        if (error) {
+          setMessage({ type: 'error', text: error.message })
         } else {
           setMessage({ 
             type: 'success', 
-            text: result.message 
+            text: 'Account created successfully. Please check your email for verification.' 
           })
         }
       } else {
-        // Call backend API
-        const result = await apiClient.signIn({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
 
-        if (!result.success) {
-          setMessage({ type: 'error', text: result.message })
+        if (error) {
+          setMessage({ type: 'error', text: error.message })
         } else {
           setMessage({ type: 'success', text: 'Successfully signed in! Redirecting...' })
-          setTimeout(() => window.location.href = '/dashboard', 1000)
+          // Redirect to home page
+          setTimeout(() => {
+            router.push('/')
+            router.refresh()
+          }, 500)
         }
       }
     } catch (error: unknown) {
@@ -76,15 +93,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setMessage(null)
 
     try {
-      // Call backend API
-      const result = await apiClient.signInWithOTP({ email })
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
 
-      if (!result.success) {
-        setMessage({ type: 'error', text: result.message })
+      if (error) {
+        setMessage({ type: 'error', text: error.message })
       } else {
         setMessage({ 
           type: 'success', 
-          text: result.message 
+          text: 'Magic link sent to your email' 
         })
       }
     } catch (error: unknown) {
@@ -100,19 +122,26 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setMessage(null)
 
     try {
-      // Call backend API
-      const result = await apiClient.signInWithOAuth({ provider: 'google' })
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      })
 
-      if (!result.success) {
-        setMessage({ type: 'error', text: result.message || 'OAuth sign in failed' })
-      } else if (result.url) {
-        // Redirect to OAuth provider
-        window.location.href = result.url
+      if (error) {
+        setMessage({ type: 'error', text: error.message || 'OAuth sign in failed' })
+        setIsLoading(false)
       }
+      // If successful, the user will be redirected, so we don't need to set isLoading to false
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       setMessage({ type: 'error', text: errorMessage })
-    } finally {
       setIsLoading(false)
     }
   }

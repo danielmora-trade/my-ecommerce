@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/footer'
+import { ProductCard } from '@/components/products/product-card'
+import { createClient } from '@/lib/supabase/server'
 import { 
   ShieldCheck, 
   Truck, 
@@ -11,7 +13,6 @@ import {
   Phone, 
   TrendingUp,
   ArrowRight,
-  Star,
   CheckCircle2
 } from 'lucide-react'
 import { getCategories, getFeaturedProducts, getProductStats } from './actions'
@@ -44,6 +45,10 @@ export default async function Home() {
   const categories = await getCategories()
   const featuredProducts = await getFeaturedProducts()
   const stats = await getProductStats()
+
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="min-h-screen bg-white">
@@ -169,57 +174,14 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => {
-              // Calcular rating promedio (placeholder por ahora)
-              const rating = 4.8
-              const stockStatus = product.quantity < 100 ? 'Limitado' : 'En stock'
-              
-              return (
-                <Link key={product.id} href={`/productos/${product.slug}`}>
-                  <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-brand-600 h-full">
-                    <CardContent className="p-0">
-                      {/* Product Image */}
-                      <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center text-6xl">
-                          {categoryIcons[product.categories?.slug || ''] || '🔩'}
-                        </div>
-                        {stockStatus === 'Limitado' && (
-                          <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                            Stock Limitado
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-white font-semibold text-sm">{rating}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">
-                          {product.name}
-                        </h3>
-                        <div className="flex items-baseline gap-2 mb-3">
-                          <span className="text-2xl font-bold text-brand-600">
-                            ${Number(product.price).toFixed(2)}
-                          </span>
-                          {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
-                            <span className="text-sm text-gray-500 line-through">
-                              ${Number(product.compare_at_price).toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                        <Button className="w-full bg-brand-600 hover:bg-brand-700">
-                          Ver Detalles
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            })}
+            {featuredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                categoryIcon={categoryIcons[product.categories?.slug || ''] || '🔩'}
+                isAuthenticated={!!user}
+              />
+            ))}
           </div>
 
           {featuredProducts.length === 0 && (

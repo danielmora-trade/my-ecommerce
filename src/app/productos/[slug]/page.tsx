@@ -6,10 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { getProductBySlug, getRelatedProducts, ReviewWithProfile } from '@/app/actions'
 import { ProductGrid } from '@/components/products/product-grid'
+import { AddToCartButton } from '@/components/cart/add-to-cart-button'
+import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { 
   ChevronRight, 
-  ShoppingCart, 
   Heart, 
   Share2, 
   Truck, 
@@ -46,6 +47,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   }
 
   const product = productData as typeof productData & { reviews: ReviewWithProfile[] }
+
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const relatedProducts = product.category_id 
     ? await getRelatedProducts(product.id, product.category_id, 4)
@@ -212,13 +217,14 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
               {/* Actions */}
               <div className="space-y-3 mb-8">
-                <Button 
-                  className="w-full h-14 text-lg bg-brand-600 hover:bg-brand-700"
+                <AddToCartButton
+                  productId={product.id}
+                  productName={product.name}
+                  isAuthenticated={!!user}
                   disabled={product.quantity === 0}
-                >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Agregar al Carrito
-                </Button>
+                  className="w-full h-14 text-lg bg-brand-600 hover:bg-brand-700"
+                  size="lg"
+                />
                 
                 <div className="grid grid-cols-2 gap-3">
                   <Button variant="outline" className="h-12">
@@ -328,7 +334,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           {relatedProducts.length > 0 && (
             <div className="mt-16">
               <h2 className="text-2xl font-bold mb-8">Productos Relacionados</h2>
-              <ProductGrid products={relatedProducts} />
+              <ProductGrid products={relatedProducts} isAuthenticated={!!user} />
             </div>
           )}
         </div>

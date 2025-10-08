@@ -1,12 +1,22 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, User, Menu, Phone, Mail } from 'lucide-react'
+import { Menu, Phone, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SearchBar } from './search-bar'
+import { NavbarActions } from './navbar-actions'
 import { getCategories } from '@/app/actions'
+import { getCartCount } from '@/app/cart-actions'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function Navbar() {
   const categories = await getCategories()
+  
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  // Get cart count if user is authenticated
+  const cartCount = user ? await getCartCount() : 0
 
   return (
     <header className="border-b border-border bg-white sticky top-0 z-50 shadow-sm">
@@ -56,23 +66,12 @@ export default async function Navbar() {
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* User account */}
-            <Link href="/auth/signin">
-              <Button variant="ghost" className="gap-2 hidden sm:flex">
-                <User className="h-5 w-5" />
-                <span className="hidden lg:inline">Mi Cuenta</span>
-              </Button>
-            </Link>
-
-            {/* Shopping cart */}
-            <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-brand-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  0
-                </span>
-              </Button>
-            </Link>
+            {/* User account and cart */}
+            <NavbarActions 
+              isAuthenticated={!!user} 
+              cartCount={cartCount}
+              userEmail={user?.email}
+            />
           </div>
         </div>
 

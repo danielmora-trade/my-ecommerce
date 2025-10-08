@@ -5,6 +5,7 @@ import { ProductGrid } from '@/components/products/product-grid'
 import { Pagination } from '@/components/products/pagination'
 import { searchProducts } from '@/app/actions'
 import { Skeleton } from '@/components/ui/skeleton'
+import { createClient } from '@/lib/supabase/server'
 import { Search } from 'lucide-react'
 
 interface SearchPageProps {
@@ -33,6 +34,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams
   const query = params.q || ''
   const page = Number(params.page) || 1
+
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   
   if (!query) {
     return (
@@ -89,7 +94,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <Suspense fallback={<ProductsLoading />}>
-            <ProductGrid products={products} />
+            <ProductGrid products={products} isAuthenticated={!!user} />
           </Suspense>
 
           <Pagination

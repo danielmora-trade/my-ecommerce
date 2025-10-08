@@ -6,6 +6,7 @@ import { ProductGrid } from '@/components/products/product-grid'
 import { Pagination } from '@/components/products/pagination'
 import { getProductsByCategory } from '@/app/actions'
 import { Skeleton } from '@/components/ui/skeleton'
+import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
@@ -53,6 +54,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   if (!category) {
     notFound()
   }
+
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const categoryIcon = categoryIcons[category.slug] || '🔧'
 
@@ -105,7 +110,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <section className="py-12">
         <div className="container mx-auto px-4">
           <Suspense fallback={<ProductsLoading />}>
-            <ProductGrid products={products} />
+            <ProductGrid products={products} isAuthenticated={!!user} />
           </Suspense>
 
           <Pagination

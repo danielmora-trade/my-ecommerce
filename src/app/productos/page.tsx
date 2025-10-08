@@ -5,6 +5,7 @@ import { ProductGrid } from '@/components/products/product-grid'
 import { Pagination } from '@/components/products/pagination'
 import { getAllProducts } from '@/app/actions'
 import { Skeleton } from '@/components/ui/skeleton'
+import { createClient } from '@/lib/supabase/server'
 
 interface ProductsPageProps {
   searchParams: {
@@ -31,6 +32,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const params = await searchParams
   const page = Number(params.page) || 1
   const { products, total, totalPages } = await getAllProducts(page, 12)
+
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="min-h-screen bg-white">
@@ -59,7 +64,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <section className="py-12">
         <div className="container mx-auto px-4">
           <Suspense fallback={<ProductsLoading />}>
-            <ProductGrid products={products} />
+            <ProductGrid products={products} isAuthenticated={!!user} />
           </Suspense>
 
           <Pagination

@@ -4,6 +4,7 @@ import { ProductWithRelations } from '@/app/actions'
 interface ProductGridProps {
   products: ProductWithRelations[]
   categoryIcons?: Record<string, string>
+  isAuthenticated?: boolean
 }
 
 const defaultCategoryIcons: Record<string, string> = {
@@ -17,7 +18,7 @@ const defaultCategoryIcons: Record<string, string> = {
   'accesorios': '🔧',
 }
 
-export const ProductGrid = ({ products, categoryIcons = defaultCategoryIcons }: ProductGridProps) => {
+export const ProductGrid = ({ products, categoryIcons = defaultCategoryIcons, isAuthenticated = false }: ProductGridProps) => {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
@@ -39,6 +40,7 @@ export const ProductGrid = ({ products, categoryIcons = defaultCategoryIcons }: 
           key={product.id}
           product={product}
           categoryIcon={categoryIcons[product.categories?.slug || ''] || '🔧'}
+          isAuthenticated={isAuthenticated}
         />
       ))}
     </div>
