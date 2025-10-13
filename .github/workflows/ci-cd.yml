@@ -1,0 +1,220 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+env:
+  NODE_VERSION: '18'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # 🔍 Análisis de Código y Calidad
+  code-quality:
+    name: 🔍 Code Quality & Security
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1️⃣ Clonar el código
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para análisis de código
+
+      # 2️⃣ Configurar Node.js
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 3️⃣ Instalar dependencias
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      # 4️⃣ Verificar tipos de TypeScript
+      - name: 🔍 TypeScript type check
+        run: npm run type-check
+
+      # 5️⃣ Linting con ESLint
+      - name: 🧹 Run ESLint
+        run: npm run lint
+
+      # 6️⃣ Auditoría de seguridad de dependencias
+      - name: 🔒 Security audit
+        run: npm audit --audit-level=high
+        continue-on-error: true # No fallar el build por vulnerabilidades menores
+
+      # 7️⃣ Verificar que el build funciona
+      - name: 🏗️ Build check
+        run: npm run build
+        env:
+          # Variables de entorno para el build (sin valores reales)
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  # 🧪 Testing
+  test:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: code-quality # Solo ejecutar si code-quality pasa
+    
+    steps:
+      # 1️⃣ Clonar el código
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configurar Node.js
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 3️⃣ Instalar dependencias
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      # 4️⃣ Ejecutar pruebas unitarias
+      - name: 🧪 Run unit tests
+        run: npm run test:ci
+        env:
+          # Variables de entorno para tests
+          NODE_ENV: test
+
+      # 5️⃣ Subir cobertura de código
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  # 📚 Documentación
+  docs:
+    name: 📚 Build Documentation
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+      # 1️⃣ Clonar el código
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configurar Node.js
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 3️⃣ Instalar dependencias del proyecto
+      - name: 📚 Install project dependencies
+        run: npm ci
+
+      # 4️⃣ Instalar dependencias de documentación
+      - name: 📚 Install docs dependencies
+        run: cd docs && npm ci
+
+      # 5️⃣ Build de documentación
+      - name: 📚 Build documentation
+        run: npm run docs:build
+
+      # 6️⃣ Verificar que la documentación se construyó correctamente
+      - name: ✅ Verify docs build
+        run: |
+          if [ ! -d "docs/build" ]; then
+            echo "Documentation build failed"
+            exit 1
+          fi
+          echo "Documentation built successfully"
+
+  # 🚀 Deploy a Vercel (solo en develop y main)
+  deploy:
+    name: 🚀 Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [code-quality, test, docs] # Solo deploy si todos los jobs anteriores pasan
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    
+    steps:
+      # 1️⃣ Clonar el código
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configurar Node.js
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 3️⃣ Instalar dependencias
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      # 4️⃣ Instalar Vercel CLI
+      - name: 📦 Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      # 5️⃣ Pull información del proyecto Vercel
+      - name: 🔗 Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # 6️⃣ Build del proyecto
+      - name: 🏗️ Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # 7️⃣ Deploy a Vercel
+      - name: 🚀 Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment-url=$url" >> $GITHUB_OUTPUT
+          echo "🚀 Deployment URL: $url"
+
+      # 8️⃣ Comentar en PR con el link de deploy (solo para PRs)
+      - name: 💬 Comment PR with deployment URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Deployment Preview**\n\n✅ Build successful!\n🔗 Preview URL: ${{ steps.deploy.outputs.deployment-url }}\n\n---\n\n*Deployment generado automáticamente por GitHub Actions*`
+            })
+
+  # 📊 Reporte de Status
+  status:
+    name: 📊 Pipeline Status
+    runs-on: ubuntu-latest
+    needs: [code-quality, test, docs, deploy]
+    if: always() # Siempre ejecutar para reportar status
+    
+    steps:
+      # 1️⃣ Reportar status del pipeline
+      - name: 📊 Report pipeline status
+        run: |
+          if [[ "${{ needs.code-quality.result }}" == "success" && 
+                "${{ needs.test.result }}" == "success" && 
+                "${{ needs.docs.result }}" == "success" ]]; then
+            echo "✅ All checks passed!"
+            echo "🚀 Pipeline completed successfully"
+          else
+            echo "❌ Some checks failed:"
+            echo "  - Code Quality: ${{ needs.code-quality.result }}"
+            echo "  - Tests: ${{ needs.test.result }}"
+            echo "  - Docs: ${{ needs.docs.result }}"
+            echo "  - Deploy: ${{ needs.deploy.result }}"
+            exit 1
+          fi
