@@ -53,7 +53,40 @@ npm run test:ci
 
 # Ver cobertura de pruebas
 npm run test:coverage
+
+# Verificación de tipos
+npm run type-check
+
+# Linting
+npm run lint
 ```
+
+## 🔄 CI/CD Pipeline
+
+El proyecto incluye un pipeline completo de GitHub Actions que se ejecuta automáticamente en cada push a `develop` o `main`:
+
+- ✅ **Code Quality**: Type checking, linting, security audit
+- ✅ **Unit Tests**: Tests con cobertura de código
+- ✅ **Documentation Build**: Verificación de documentación
+- ✅ **Deploy to Vercel**: Despliegue automático (solo si todos los checks pasan)
+
+### Configuración del Pipeline
+
+Ver [Guía Completa de Configuración](.github/PIPELINE_SETUP.md) para:
+- Configurar GitHub Secrets
+- Configurar Vercel
+- Obtener tokens y IDs necesarios
+- Solución de problemas
+
+### Secrets Requeridos en GitHub
+
+| Secret | Descripción |
+|--------|-------------|
+| `VERCEL_TOKEN` | Token de autenticación de Vercel |
+| `VERCEL_ORG_ID` | ID de organización/cuenta Vercel |
+| `VERCEL_PROJECT_ID` | ID del proyecto Vercel |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL de tu proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anónima de Supabase |
 
 ## 📚 Documentación
 

@@ -14,8 +14,12 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('Pagination', () => {
+  const defaultProps = {
+    baseUrl: '/productos',
+  }
+
   it('should render page numbers correctly', () => {
-    render(<Pagination totalPages={5} currentPage={1} />)
+    render(<Pagination {...defaultProps} totalPages={5} currentPage={1} />)
 
     expect(screen.getByText('1')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
@@ -23,21 +27,21 @@ describe('Pagination', () => {
   })
 
   it('should disable previous button on first page', () => {
-    render(<Pagination totalPages={5} currentPage={1} />)
+    render(<Pagination {...defaultProps} totalPages={5} currentPage={1} />)
 
     const previousButton = screen.getByText(/anterior/i)
     expect(previousButton).toBeDisabled()
   })
 
   it('should disable next button on last page', () => {
-    render(<Pagination totalPages={5} currentPage={5} />)
+    render(<Pagination {...defaultProps} totalPages={5} currentPage={5} />)
 
     const nextButton = screen.getByText(/siguiente/i)
     expect(nextButton).toBeDisabled()
   })
 
   it('should enable both buttons on middle page', () => {
-    render(<Pagination totalPages={5} currentPage={3} />)
+    render(<Pagination {...defaultProps} totalPages={5} currentPage={3} />)
 
     const previousButton = screen.getByText(/anterior/i)
     const nextButton = screen.getByText(/siguiente/i)
@@ -47,20 +51,20 @@ describe('Pagination', () => {
   })
 
   it('should highlight current page', () => {
-    render(<Pagination totalPages={5} currentPage={3} />)
+    render(<Pagination {...defaultProps} totalPages={5} currentPage={3} />)
 
     const currentPageButton = screen.getByText('3')
     expect(currentPageButton).toHaveClass('bg-brand-600')
   })
 
   it('should not render if only one page', () => {
-    const { container } = render(<Pagination totalPages={1} currentPage={1} />)
+    const { container } = render(<Pagination {...defaultProps} totalPages={1} currentPage={1} />)
 
     expect(container.querySelector('nav')).not.toBeInTheDocument()
   })
 
   it('should show limited page numbers for many pages', () => {
-    render(<Pagination totalPages={20} currentPage={10} />)
+    render(<Pagination {...defaultProps} totalPages={20} currentPage={10} />)
 
     // Should show current page
     expect(screen.getByText('10')).toBeInTheDocument()

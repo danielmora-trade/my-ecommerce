@@ -1,0 +1,25 @@
+# Documentación (Docusaurus)
+docs/
+
+# Tests
+src/__tests__/
+coverage/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# GitHub
+.github/
+
+# Scripts
+scripts/
+
+# Archivos de configuración de tests
+jest.config.js
+jest.setup.ts
+
+# Archivos markdown de documentación del proyecto
+*.md
+!README.md
+
