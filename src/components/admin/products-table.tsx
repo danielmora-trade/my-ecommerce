@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 interface Product {
   id: string
   name: string
+  slug: string
   sku: string
   price: number
   discount_percentage: number | null
@@ -164,7 +165,7 @@ export const ProductsTable = ({ products, currentPage, totalPages, total }: Prod
 
                       {/* Acciones */}
                       <div className="col-span-2 flex justify-end gap-2">
-                        <Link href={`/productos/${product.sku}`} target="_blank">
+                        <Link href={`/productos/${product.slug}`} target="_blank">
                           <Button
                             variant="ghost"
                             size="sm"
