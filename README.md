@@ -1,82 +1,114 @@
-# My E-Commerce
+# ACEROMAX E-Commerce
 
-A modern e-commerce application built with Next.js, Supabase, and Tailwind CSS.
+Plataforma de comercio electrónico para distribución de aceros y materiales de construcción.
 
-## Tech Stack
+## 🚀 Características
 
-- **Next.js 15** - React framework with App Router
-- **Supabase** - Backend as a Service (Database, Auth, Storage)
-- **Tailwind CSS** - Utility-first CSS framework
-- **TypeScript** - Type safety
+- ✅ Catálogo completo de productos con búsqueda y filtros
+- ✅ Sistema de autenticación (Email, Magic Link, OAuth Google)
+- ✅ Carrito de compras persistente
+- ✅ Checkout completo con múltiples métodos de pago
+- ✅ Panel de administración para gestión de productos y pedidos
+- ✅ Sistema de roles y permisos
+- ✅ Gestión de pedidos y seguimiento
+- ✅ Pruebas unitarias con Jest
+- ✅ Documentación completa con Docusaurus
 
-## Getting Started
+## 🛠️ Stack Tecnológico
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js Server Actions
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth
+- **UI**: Shadcn/ui, Radix UI
+- **Testing**: Jest, React Testing Library
+- **Docs**: Docusaurus
 
-2. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Add your Supabase credentials to `.env.local`:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+## 📦 Instalación
 
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
+```bash
+# Clonar el repositorio
+git clone <repository-url>
+cd my-ecommerce
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+# Instalar dependencias
+npm install
 
-## Project Structure
+# Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus credenciales de Supabase
 
-```
-src/
-├── app/                    # Next.js App Router pages
-├── components/             # Reusable React components
-├── lib/
-│   └── supabase/          # Supabase client utilities
-└── types/
-    ├── ecommerce-schema.ts         # Core e-commerce type definitions
-    ├── ecommerce-schema.examples.ts # Usage examples
-    ├── SCHEMA_DOCUMENTATION.md     # Detailed schema docs
-    └── database.types.ts           # Supabase generated types
+# Ejecutar en desarrollo
+npm run dev
 ```
 
-## E-Commerce Schema
+## 🧪 Testing
 
-This project includes a comprehensive type system for building an Amazon-like e-commerce platform. The schema includes:
+```bash
+# Ejecutar todas las pruebas
+npm test
 
-- 👤 **User Management** - Users, addresses, authentication
-- 🛍️ **Product Catalog** - Products, categories, variants, images
-- 🛒 **Shopping & Orders** - Cart, wishlist, orders, order items
-- 💳 **Payments** - Payment processing, saved payment methods
-- 🎟️ **Marketing** - Coupons, discounts, promotions
-- ⭐ **Reviews & Ratings** - Product reviews with images
-- 🏪 **Seller/Vendor** - Multi-vendor marketplace support
-- 📦 **Shipping** - Shipping methods, tracking, fulfillment
-- 🔔 **Notifications** - User notifications system
-- 🎫 **Support** - Customer support, returns, refunds
-- 📊 **Analytics** - Product views, search tracking
-- 📦 **Inventory** - Inventory transaction tracking
+# Ejecutar pruebas en modo CI
+npm run test:ci
 
-See `src/types/SCHEMA_DOCUMENTATION.md` for detailed documentation and examples.
+# Ver cobertura de pruebas
+npm run test:coverage
+```
 
-## Available Scripts
+## 📚 Documentación
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
+La documentación completa está disponible en el directorio `/docs`:
 
-## Learn More
+```bash
+cd docs
+npm install
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Supabase Documentation](https://supabase.com/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+Visita http://localhost:3000 para ver la documentación.
+
+## 🗄️ Base de Datos
+
+Este proyecto usa Supabase. Las migraciones se encuentran en `/supabase/migrations`.
+
+Para aplicar migraciones:
+1. Ve a tu proyecto en Supabase Dashboard
+2. Navega a SQL Editor
+3. Ejecuta las migraciones en orden
+
+## 🔑 Variables de Entorno
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=tu-url-de-supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+```
+
+## 📁 Estructura del Proyecto
+
+```
+my-ecommerce/
+├── docs/                    # Documentación (Docusaurus)
+├── src/
+│   ├── app/                 # Next.js App Router
+│   ├── components/          # Componentes React
+│   ├── lib/                 # Utilidades
+│   ├── types/              # Tipos TypeScript
+│   └── __tests__/          # Pruebas
+├── supabase/
+│   └── migrations/         # Migraciones DB
+└── public/                 # Assets estáticos
+```
+
+## 🚦 Scripts Disponibles
+
+- `npm run dev` - Servidor de desarrollo
+- `npm run build` - Build de producción
+- `npm start` - Servidor de producción
+- `npm run lint` - Linter
+- `npm test` - Ejecutar pruebas
+- `npm run test:ci` - Pruebas en CI
+- `npm run test:coverage` - Cobertura de pruebas
+
+## 📝 Licencia
+
+Privado y propietario.
