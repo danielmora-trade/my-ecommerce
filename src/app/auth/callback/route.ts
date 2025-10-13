@@ -1,9 +1,12 @@
-import { authService } from '@/backend/services/auth.service'
+import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
+  const type = searchParams.get('type')
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
   const next = searchParams.get('next') ?? '/'
@@ -14,11 +17,37 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${error}`)
   }
 
-  // PKCE flow - exchange code for session
-  if (code) {
-    const result = await authService.exchangeCodeForSession(code)
+  // Create Supabase client with cookie access
+  const cookieStore = await cookies()
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
+
+  // Handle magic link (OTP) flow
+  if (tokenHash && type) {
+    console.log('Processing magic link callback:', { type })
     
-    if (result.success && result.session) {
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as 'email' | 'magiclink' | 'recovery' | 'invite' | 'signup' | 'email_change',
+    })
+
+    if (!verifyError && data?.session) {
+      console.log('Magic link verified successfully')
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
       
@@ -31,26 +60,39 @@ export async function GET(request: NextRequest) {
         redirectUrl = `${origin}${next}`
       }
 
-      const response = NextResponse.redirect(redirectUrl)
+      return NextResponse.redirect(redirectUrl)
+    } else {
+      console.error('Magic link verification error:', verifyError)
+      const errorMessage = verifyError ? String(verifyError.message || verifyError) : 'Invalid or expired link'
+      return NextResponse.redirect(`${origin}/auth/auth-code-error?error=magic_link_failed&details=${encodeURIComponent(errorMessage)}`)
+    }
+  }
 
-      // Set session cookies
-      response.cookies.set('access_token', result.session.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: '/',
-      })
+  // Handle OAuth PKCE flow - exchange code for session
+  if (code) {
+    console.log('Processing OAuth callback with code')
+    
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (!exchangeError && data?.session) {
+      console.log('OAuth code exchanged successfully')
+      const forwardedHost = request.headers.get('x-forwarded-host')
+      const isLocalEnv = process.env.NODE_ENV === 'development'
+      
+      let redirectUrl: string
+      if (isLocalEnv) {
+        redirectUrl = `${origin}${next}`
+      } else if (forwardedHost) {
+        redirectUrl = `https://${forwardedHost}${next}`
+      } else {
+        redirectUrl = `${origin}${next}`
+      }
 
-      response.cookies.set('refresh_token', result.session.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: '/',
-      })
-
-      return response
+      return NextResponse.redirect(redirectUrl)
+    } else {
+      console.error('Exchange code error:', exchangeError)
+      const errorMessage = exchangeError ? String(exchangeError.message || exchangeError) : 'Unknown error'
+      return NextResponse.redirect(`${origin}/auth/auth-code-error?error=exchange_failed&details=${encodeURIComponent(errorMessage)}`)
     }
   }
 
