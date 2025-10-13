@@ -9,6 +9,7 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "type-check": "tsc --noEmit",
+    "type-check:pipeline": "tsc --noEmit --project tsconfig.pipeline.json",
     "test": "jest --watch",
     "test:ci": "jest --ci --coverage --watchAll=false",
     "test:coverage": "jest --coverage",

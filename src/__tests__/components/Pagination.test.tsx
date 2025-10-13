@@ -16,10 +16,12 @@ jest.mock('next/navigation', () => ({
 describe('Pagination', () => {
   const defaultProps = {
     baseUrl: '/productos',
+    totalPages: 5,
+    currentPage: 1,
   }
 
   it('should render page numbers correctly', () => {
-    render(<Pagination {...defaultProps} totalPages={5} currentPage={1} />)
+    render(<Pagination {...defaultProps} />)
 
     expect(screen.getByText('1')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
@@ -27,7 +29,7 @@ describe('Pagination', () => {
   })
 
   it('should disable previous button on first page', () => {
-    render(<Pagination {...defaultProps} totalPages={5} currentPage={1} />)
+    render(<Pagination {...defaultProps} />)
 
     const previousButton = screen.getByText(/anterior/i)
     expect(previousButton).toBeDisabled()
@@ -41,7 +43,7 @@ describe('Pagination', () => {
   })
 
   it('should enable both buttons on middle page', () => {
-    render(<Pagination {...defaultProps} totalPages={5} currentPage={3} />)
+    render(<Pagination {...defaultProps} currentPage={3} />)
 
     const previousButton = screen.getByText(/anterior/i)
     const nextButton = screen.getByText(/siguiente/i)
@@ -51,14 +53,14 @@ describe('Pagination', () => {
   })
 
   it('should highlight current page', () => {
-    render(<Pagination {...defaultProps} totalPages={5} currentPage={3} />)
+    render(<Pagination {...defaultProps} currentPage={3} />)
 
     const currentPageButton = screen.getByText('3')
     expect(currentPageButton).toHaveClass('bg-brand-600')
   })
 
   it('should not render if only one page', () => {
-    const { container } = render(<Pagination {...defaultProps} totalPages={1} currentPage={1} />)
+    const { container } = render(<Pagination {...defaultProps} totalPages={1} />)
 
     expect(container.querySelector('nav')).not.toBeInTheDocument()
   })

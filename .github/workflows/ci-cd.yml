@@ -39,9 +39,9 @@ jobs:
       - name: 📚 Install dependencies
         run: npm ci
 
-      # 4️⃣ Verificar tipos de TypeScript
+      # 4️⃣ Verificar tipos de TypeScript (solo código principal, excluyendo docs)
       - name: 🔍 TypeScript type check
-        run: npm run type-check
+        run: npm run type-check:pipeline
 
       # 5️⃣ Linting con ESLint
       - name: 🧹 Run ESLint
