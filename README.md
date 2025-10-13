@@ -98,6 +98,12 @@ npm install
 npm start
 ```
 
+O bien, puedes desde la raíz del proyecto ejecutar el siguiente comando para generar la documentación:
+
+```bash
+npm run docs
+```
+
 Visita http://localhost:3000 para ver la documentación.
 
 ## 🗄️ Base de Datos
