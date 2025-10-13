@@ -39,6 +39,11 @@ interface Order {
   cancelled_at: string | null
   tracking_number: string | null
   user_id: string
+  user_email: string | null
+  user_profile: {
+    first_name: string | null
+    last_name: string | null
+  } | null
   shipping_address: ShippingAddress | null
   order_items: OrderItem[]
 }
@@ -86,7 +91,17 @@ export const OrdersTable = ({ orders, currentPage, totalPages, total, statusFilt
   }
 
   const getCustomerName = (order: Order) => {
-    return order.shipping_address?.full_name || 'Cliente'
+    // Prioridad: nombre del perfil > email > "Cliente"
+    if (order.user_profile?.first_name && order.user_profile?.last_name) {
+      return `${order.user_profile.first_name} ${order.user_profile.last_name}`
+    }
+    if (order.user_profile?.first_name) {
+      return order.user_profile.first_name
+    }
+    if (order.user_email) {
+      return order.user_email
+    }
+    return 'Cliente'
   }
 
   return (

@@ -31,6 +31,11 @@ interface OrderWithDetails {
   tracking_number: string | null
   notes: string | null
   user_id: string
+  user_email: string | null
+  user_profile: {
+    first_name: string | null
+    last_name: string | null
+  } | null
   shipping_address: {
     full_name: string
     phone: string
@@ -113,9 +118,24 @@ export async function getAllOrdersAdmin(page = 1, limit = 20, statusFilter?: Ord
     return { orders: [], total: 0, totalPages: 0 }
   }
 
+  // Obtener los emails de los usuarios usando la función RPC
+  const ordersWithEmails = await Promise.all(
+    (orders || []).map(async (order) => {
+      const { data: email } = await supabase.rpc('get_user_email', { 
+        user_id: order.user_id 
+      })
+      
+      return {
+        ...order,
+        user_email: email || null,
+        user_profile: null, // Por ahora null, podríamos agregarlo después
+      }
+    })
+  )
+
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    orders: (orders || []) as any as OrderWithDetails[],
+    orders: ordersWithEmails as any as OrderWithDetails[],
     total: count || 0,
     totalPages: Math.ceil((count || 0) / limit),
   }

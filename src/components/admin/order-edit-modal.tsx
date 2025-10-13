@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -84,15 +84,25 @@ export const OrderEditModal = ({ order, isOpen, onClose }: OrderEditModalProps) 
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // Reset form cuando cambia el pedido
-  useState(() => {
-    if (order) {
+  // Reset form cuando cambia el pedido o se abre el modal
+  useEffect(() => {
+    if (order && isOpen) {
       setStatus((order.status as OrderStatus) || 'pending')
       setEstimatedDate(order.estimated_delivery_date ? order.estimated_delivery_date.split('T')[0] : '')
       setTrackingNumber(order.tracking_number || '')
       setNotes(order.notes || '')
     }
-  })
+  }, [order, isOpen])
+
+  // Limpiar formulario cuando se cierra el modal
+  useEffect(() => {
+    if (!isOpen) {
+      setStatus('pending')
+      setEstimatedDate('')
+      setTrackingNumber('')
+      setNotes('')
+    }
+  }, [isOpen])
 
   if (!order) return null
 
